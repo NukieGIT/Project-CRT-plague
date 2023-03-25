@@ -10,6 +10,7 @@ public class PlayerCameraController : MonoBehaviour
 
     private CharacterInput _characterInput;
     private Vector2 _cameraRotation = Vector2.zero;
+    private Vector2 _cameraOffset = Vector2.zero;
 
     private void Awake()
     {
@@ -19,26 +20,23 @@ public class PlayerCameraController : MonoBehaviour
 
     private void OnEnable()
     {
-        _characterInput.HumanoidCamera.Camera.performed += MouseInput;
         _characterInput.Enable();
     }
 
     private void OnDisable()
     {
-        _characterInput.HumanoidCamera.Camera.performed -= MouseInput;
         _characterInput.Disable();
     }
 
     private void LateUpdate()
     {
-        playerCamera.transform.rotation = Quaternion.Euler(_cameraRotation);
+
+        var mouseDelta = _characterInput.HumanoidCamera.Camera.ReadValue<Vector2>() * mouseSensitivity;
+        
+        _cameraRotation += new Vector2(-mouseDelta.y, mouseDelta.x);
+        _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, -90f, 90f);
+        
+        playerCamera.transform.rotation = Quaternion.Euler(_cameraRotation + _cameraOffset);
     }
 
-    private void MouseInput(InputAction.CallbackContext ctx)
-    {
-        var _mouseDelta = ctx.ReadValue<Vector2>() * mouseSensitivity;
-        
-        _cameraRotation += new Vector2(-_mouseDelta.y, _mouseDelta.x);
-        _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, -90f, 90f);
-    }
 }

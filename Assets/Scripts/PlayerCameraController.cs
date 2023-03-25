@@ -1,20 +1,21 @@
-using System;
+using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Camera))]
 public class PlayerCameraController : MonoBehaviour
 {
-    private Camera playerCamera;
     [SerializeField] private float mouseSensitivity = 0.1f;
+    [SerializeField] private Transform cameraTargetPosition;
 
+    [CanBeNull] private Camera _playerCamera;
     private CharacterInput _characterInput;
     private Vector2 _cameraRotation = Vector2.zero;
+    // TODO: add some kind of shaking effect to the camera
     private Vector2 _cameraOffset = Vector2.zero;
 
     private void Awake()
     {
-        playerCamera = GetComponent<Camera>();
+        _playerCamera = GetComponent<Camera>();
         _characterInput = new CharacterInput();
     }
 
@@ -36,7 +37,8 @@ public class PlayerCameraController : MonoBehaviour
         _cameraRotation += new Vector2(-mouseDelta.y, mouseDelta.x);
         _cameraRotation.x = Mathf.Clamp(_cameraRotation.x, -90f, 90f);
         
-        playerCamera.transform.rotation = Quaternion.Euler(_cameraRotation + _cameraOffset);
+        _playerCamera.transform.rotation = Quaternion.Euler(_cameraRotation + _cameraOffset);
+        _playerCamera.transform.position = cameraTargetPosition.position;
     }
 
 }

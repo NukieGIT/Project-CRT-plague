@@ -8501,8 +8501,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCameraController: {fileID: 1707891117}
   maxMovementSpeed: 10
-  acceleration: 0.5
-  jumpForce: 350
+  acceleration: 3
+  jumpForce: 100
   extraHeight: 0.01
 --- !u!136 &1786015302
 CapsuleCollider:

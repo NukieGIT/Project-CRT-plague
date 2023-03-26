@@ -8,9 +8,9 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private PlayerCameraController playerCameraController;
     [Space]
     [Header("Settings")]
-    [SerializeField] private float maxMovementSpeed = 10f;
-    [SerializeField] private float acceleration = 3f;
-    [SerializeField] private float jumpForce = 100f;
+    [SerializeField] private float maxMovementSpeed = 5f;
+    [SerializeField] private float acceleration = 0.5f;
+    [SerializeField] private float jumpForce = 600f;
     [SerializeField] private float extraHeight = 0.01f;
 
     public bool IsGrounded { get; private set; }

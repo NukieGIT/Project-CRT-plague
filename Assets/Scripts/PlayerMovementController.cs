@@ -1,12 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-[RequireComponent(typeof(Rigidbody))]
-public class PlayerMovementController : MonoBehaviour
+public class PlayerMovementController : MonoBehaviour, IPlayerMovement
 {
-    [Header("References")]
-    [SerializeField] private PlayerCameraController playerCameraController;
-    [Space]
     [Header("Settings")]
     [SerializeField] private float maxMovementSpeed = 5f;
     [SerializeField] private float acceleration = 0.5f;
@@ -14,7 +10,11 @@ public class PlayerMovementController : MonoBehaviour
     [SerializeField] private float extraHeight = 0.01f;
 
     public bool IsGrounded { get; private set; }
+    public Vector3 Velocity => _rigidbody.velocity;
+    public Vector3 Position => _rigidbody.position;
+
     
+    private IPlayerCamera _playerCameraController;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsuleCollider;
     
@@ -24,6 +24,7 @@ public class PlayerMovementController : MonoBehaviour
 
     private void Awake()
     {
+        _playerCameraController = GetComponent<IPlayerCamera>();
         _rigidbody = GetComponent<Rigidbody>();
         _capsuleCollider = GetComponent<CapsuleCollider>();
         _characterInput = new CharacterInput();
@@ -64,7 +65,7 @@ public class PlayerMovementController : MonoBehaviour
         var playerInput = _characterInput.Humanoid.Movement.ReadValue<Vector2>();
         var movementDirection = new Vector3(playerInput.x, 0, playerInput.y);
         
-        var cameraRotationVector = playerCameraController.CameraRotationVector;
+        var cameraRotationVector = _playerCameraController.CameraRotationVector;
         cameraRotationVector = new Vector2(0, cameraRotationVector.y);
         var cameraRotation = Quaternion.Euler(cameraRotationVector);
         
@@ -72,18 +73,21 @@ public class PlayerMovementController : MonoBehaviour
         
         var velocityInDirection = Vector3.Dot(_rigidbody.velocity, desiredMovementDirection);
 
-        // you can strafe and get infinite speed lmao gotta fix this
-        
-        if (velocityInDirection < maxMovementSpeed)
-        {
-            _rigidbody.AddForce(desiredMovementDirection * acceleration, ForceMode.VelocityChange);
-        }
+        _rigidbody.velocity =
+            new Vector3(desiredMovementDirection.x * maxMovementSpeed, _rigidbody.velocity.y,
+                desiredMovementDirection.z * maxMovementSpeed);
 
-        Debug.Log("_rigidbody.velocity.magnitude = " + _rigidbody.velocity.magnitude);
+        // you can strafe and get infinite speed lmao gotta fix this
+
+        // if (velocityInDirection < maxMovementSpeed)
+        // {
+        //     _rigidbody.AddForce(desiredMovementDirection * acceleration, ForceMode.VelocityChange);
+        // }
     }
 
     private void OnDrawGizmosSelected()
     {
+        // TODO: also should be delegated to another class
         if (!Application.isPlaying) return;
         Gizmos.color = IsGrounded ? Color.green : Color.red;
 
@@ -94,5 +98,15 @@ public class PlayerMovementController : MonoBehaviour
             new Vector3(bounds.size.x,
                 bounds.extents.y + extraHeight,
                 bounds.size.z));
+    }
+    
+    public void Move(Vector3 direction)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void Teleport(Vector3 position)
+    {
+        _rigidbody.position = position;
     }
 }

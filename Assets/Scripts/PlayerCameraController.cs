@@ -1,24 +1,25 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Camera))]
-public class PlayerCameraController : MonoBehaviour
+public class PlayerCameraController : MonoBehaviour, IPlayerCamera
 {
-    [SerializeField] private float mouseSensitivity = 0.1f;
+    
+    [Header("References")]
     [SerializeField] private Transform cameraTargetPosition;
-
-    private Camera _playerCamera;
-    private CharacterInput _characterInput;
+    [SerializeField] private Transform cameraTransform;
+    [Space]
+    
+    [Header("Settings")]
+    [SerializeField] private PlayerCameraSettings playerCameraSettings;
+    
+    public PlayerCameraSettings PlayerCameraSettings => playerCameraSettings;
     
     private Vector2 _cameraRotationVector = Vector2.zero;
-    
-    // TODO: add some kind of shaking effect to the camera
-    private Vector2 _cameraOffset = Vector2.zero;
-    
     public Vector2 CameraRotationVector => _cameraRotationVector;
+
+    private CharacterInput _characterInput;
 
     private void Awake()
     {
-        _playerCamera = GetComponent<Camera>();
         _characterInput = new CharacterInput();
     }
 
@@ -35,13 +36,24 @@ public class PlayerCameraController : MonoBehaviour
     private void LateUpdate()
     {
 
-        var mouseDelta = _characterInput.HumanoidCamera.Camera.ReadValue<Vector2>() * mouseSensitivity;
+        var mouseDelta = _characterInput.HumanoidCamera.Camera.ReadValue<Vector2>();
+        mouseDelta *= PlayerCameraSettings.MouseSensitivity;
         
         _cameraRotationVector += new Vector2(-mouseDelta.y, mouseDelta.x);
         _cameraRotationVector.x = Mathf.Clamp(_cameraRotationVector.x, -90f, 90f);
         
-        _playerCamera.transform.rotation = Quaternion.Euler(_cameraRotationVector + _cameraOffset);
-        _playerCamera.transform.position = cameraTargetPosition.position;
+        cameraTransform.transform.rotation = Quaternion.Euler(CameraRotationVector);
+        cameraTransform.transform.position = cameraTargetPosition.position;
+    }
+    
+    public void LookAt(Transform target)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void LookAt(Vector3 target)
+    {
+        throw new System.NotImplementedException();
     }
 
 }

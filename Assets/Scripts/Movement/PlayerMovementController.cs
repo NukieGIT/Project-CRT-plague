@@ -17,7 +17,7 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     private IPlayerCamera _playerCameraController;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsuleCollider;
-    
+    private readonly GroundChecker _groundChecker = new();
     private CharacterInput _characterInput;
     
     private RaycastHit _hit;
@@ -50,14 +50,7 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
 
     private void Update()
     {
-        // TODO: delegate it to another class pls
-        var bounds = _capsuleCollider.bounds;
-        IsGrounded = Physics.BoxCast(bounds.center,
-            bounds.extents / 2,
-            Vector3.down,
-            out _hit,
-            _rigidbody.rotation,
-            bounds.extents.y / 2 + extraHeight);
+        IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit);
     }
 
     private void FixedUpdate()
@@ -87,13 +80,16 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
 
     private void OnDrawGizmosSelected()
     {
-        // TODO: also should be delegated to another class
+        
+        // idk how to delegate gizmos to another class cause it just doesn't work
+        
         if (!Application.isPlaying) return;
         Gizmos.color = IsGrounded ? Color.green : Color.red;
 
         var bounds = _capsuleCollider.bounds;
-        var toCenter = Vector3.down * (bounds.extents.y / 2);
         
+        var toCenter = Vector3.down * (bounds.extents.y / 2);
+            
         Gizmos.DrawWireCube(bounds.center + toCenter + Vector3.down * extraHeight / 2,
             new Vector3(bounds.size.x,
                 bounds.extents.y + extraHeight,

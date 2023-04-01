@@ -6,11 +6,23 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     [Header("Settings")]
     [SerializeField] private float maxMovementSpeed = 5f;
     [SerializeField] private float acceleration = 0.5f;
+    [SerializeField] private float frictionCoefficient = 0.16f;
     [SerializeField] private float jumpForce = 600f;
     [SerializeField] private float extraHeight = 0.01f;
 
     public bool IsGrounded { get; private set; }
-    public Vector3 Velocity => _rigidbody.velocity;
+
+    public Vector3 Velocity
+    {
+        get => _rigidbody.velocity;
+        set => _rigidbody.velocity = value;
+    }
+    
+    public float FrictionCoefficient { 
+        get => frictionCoefficient;
+        set => frictionCoefficient = value;
+    }
+    
     public Vector3 Position => _rigidbody.position;
 
     
@@ -53,6 +65,18 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
         IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit);
     }
 
+    private void ApplyFriction()
+    {
+        var velMag = _rigidbody.velocity.magnitude;
+        if (velMag <= 0f) return;
+        
+        var frictionForceMag = frictionCoefficient * velMag;
+
+        var counterForce = -_rigidbody.velocity * frictionForceMag / velMag;
+
+        _rigidbody.AddForce(counterForce, ForceMode.VelocityChange);
+    }
+
     private void FixedUpdate()
     {
         var playerInput = _characterInput.Humanoid.Movement.ReadValue<Vector2>();
@@ -66,16 +90,12 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
         
         var velocityInDirection = Vector3.Dot(_rigidbody.velocity, desiredMovementDirection);
 
-        _rigidbody.velocity =
-            new Vector3(desiredMovementDirection.x * maxMovementSpeed, _rigidbody.velocity.y,
-                desiredMovementDirection.z * maxMovementSpeed);
+        _rigidbody.AddForce(new Vector3(desiredMovementDirection.x * acceleration, 0, desiredMovementDirection.z * acceleration), ForceMode.VelocityChange);
 
-        // you can strafe and get infinite speed lmao gotta fix this
-
-        // if (velocityInDirection < maxMovementSpeed)
-        // {
-        //     _rigidbody.AddForce(desiredMovementDirection * acceleration, ForceMode.VelocityChange);
-        // }
+        if (IsGrounded)
+        {
+            ApplyFriction();
+        }
     }
 
     private void OnDrawGizmosSelected()

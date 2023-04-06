@@ -7,10 +7,13 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     [SerializeField] private float maxMovementSpeed = 5f;
     [SerializeField] private float acceleration = 0.5f;
     [SerializeField] private float frictionCoefficient = 0.16f;
+    [SerializeField] private float slideSpeed = 15f;
     [SerializeField] private float jumpForce = 600f;
     [SerializeField] private float extraHeight = 0.01f;
 
     public bool IsGrounded { get; private set; }
+    public bool IsSliding { get; private set; }
+    public bool IsCrouching { get; private set; }
 
     public Vector3 Velocity
     {
@@ -24,16 +27,19 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     }
     
     public Vector3 Position => _rigidbody.position;
-
     
+    
+    // refs
     private IPlayerCamera _playerCameraController;
     private Rigidbody _rigidbody;
     private CapsuleCollider _capsuleCollider;
-    private readonly GroundChecker _groundChecker = new();
     private CharacterInput _characterInput;
-    
-    private RaycastHit _hit;
 
+    
+    // private fields
+    private readonly GroundChecker _groundChecker = new();
+    private RaycastHit _hit;
+    
     private void Awake()
     {
         _playerCameraController = GetComponent<IPlayerCamera>();
@@ -46,12 +52,35 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     {
         _characterInput.Humanoid.Enable();
         _characterInput.Humanoid.Jump.performed += Jump;
+        _characterInput.Humanoid.Slide.started += SlideStart;
+        _characterInput.Humanoid.Slide.canceled += SlideEnd;
+    }
+
+    private void SlideEnd(InputAction.CallbackContext obj)
+    {
+        IsSliding = false;
+    }
+
+    private void SlideStart(InputAction.CallbackContext obj)
+    {
+        if (!IsGrounded) return;
+        
+        IsSliding = true;
+
+        var diff = Mathf.Max(slideSpeed - _rigidbody.velocity.magnitude, 0);
+        
+        var force = _rigidbody.velocity.normalized * diff;
+        force.y = 0;
+        
+        _rigidbody.AddForce(force, ForceMode.VelocityChange);
     }
 
     private void OnDisable()
     {
         _characterInput.Humanoid.Disable();
         _characterInput.Humanoid.Jump.performed -= Jump;
+        _characterInput.Humanoid.Slide.started -= SlideStart;
+        _characterInput.Humanoid.Slide.canceled -= SlideEnd;
     }
     
     private void Jump(InputAction.CallbackContext ctx)
@@ -65,6 +94,20 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
         IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit);
     }
 
+    private void FixedUpdate()
+    {
+        if (IsGrounded)
+        {
+            ApplyFriction();
+        }
+
+        if (IsGrounded && !IsSliding)
+        {
+            Move();
+        }
+        
+    }
+
     private void ApplyFriction()
     {
         var velMag = _rigidbody.velocity.magnitude;
@@ -76,8 +119,9 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
 
         _rigidbody.AddForce(counterForce, ForceMode.VelocityChange);
     }
+    
 
-    private void FixedUpdate()
+    private void Move()
     {
         var playerInput = _characterInput.Humanoid.Movement.ReadValue<Vector2>();
         var movementDirection = new Vector3(playerInput.x, 0, playerInput.y);
@@ -85,23 +129,21 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
         var cameraRotationVector = _playerCameraController.CameraRotationVector;
         cameraRotationVector = new Vector2(0, cameraRotationVector.y);
         var cameraRotation = Quaternion.Euler(cameraRotationVector);
-        
+
         var desiredMovementDirection = cameraRotation * movementDirection;
-        
+
         var velocityInDirection = Vector3.Dot(_rigidbody.velocity, desiredMovementDirection);
-
-        _rigidbody.AddForce(new Vector3(desiredMovementDirection.x * acceleration, 0, desiredMovementDirection.z * acceleration), ForceMode.VelocityChange);
-
-        if (IsGrounded)
+        
+        var missingSpeed = acceleration;
+        
+        if (velocityInDirection + missingSpeed >= maxMovementSpeed)
         {
-            ApplyFriction();
+            missingSpeed = Mathf.Clamp(maxMovementSpeed - velocityInDirection, 0, acceleration);
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        
-        // idk how to delegate gizmos to another class cause it just doesn't work
         
         if (!Application.isPlaying) return;
         Gizmos.color = IsGrounded ? Color.green : Color.red;

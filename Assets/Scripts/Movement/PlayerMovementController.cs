@@ -125,6 +125,7 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
     {
         var playerInput = _characterInput.Humanoid.Movement.ReadValue<Vector2>();
         var movementDirection = new Vector3(playerInput.x, 0, playerInput.y);
+        var normal = _hit.normal;
         
         var cameraRotationVector = _playerCameraController.CameraRotationVector;
         cameraRotationVector = new Vector2(0, cameraRotationVector.y);
@@ -140,6 +141,12 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
         {
             missingSpeed = Mathf.Clamp(maxMovementSpeed - velocityInDirection, 0, acceleration);
         }
+
+        var force = desiredMovementDirection * missingSpeed;
+        force = Vector3.ProjectOnPlane(force, normal);
+        
+        _rigidbody.AddForce(force, ForceMode.VelocityChange);
+
     }
 
     private void OnDrawGizmosSelected()
@@ -156,6 +163,9 @@ public class PlayerMovementController : MonoBehaviour, IPlayerMovement
             new Vector3(bounds.size.x,
                 bounds.extents.y + extraHeight,
                 bounds.size.z));
+        
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(_hit.point, _hit.point + _hit.normal * 5);
     }
     
     public void Move(Vector3 direction)

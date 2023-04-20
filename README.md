@@ -2,9 +2,10 @@
 Konkurs moment
  
  
- # Contribution
+# Contribution
+_Something you can do whenever you're bored_
  
- # Commits
+ ## Commits
  - You cannot commit to main
  - When you add a new feature, create a new branch for it
  - You can also fork the repo and then add a new feature
@@ -12,7 +13,7 @@ Konkurs moment
  - Your changes will be reviewd by code owners
  - If your code is alright, it will be merged
 
-> To Setup the project on your machine head [here](#setup) 
+> To Setup this project on your machine head [here](#setup) 
  
  
 # Setup

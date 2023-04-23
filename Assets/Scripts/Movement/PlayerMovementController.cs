@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Movement
 {
@@ -59,6 +58,13 @@ namespace Movement
         private void Update()
         {
             IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit);
+
+            SlopeSlidingHandling();
+        }
+
+        private void SlopeSlidingHandling()
+        {
+            _rigidbody.useGravity = !IsGrounded;
         }
 
         private void FixedUpdate()

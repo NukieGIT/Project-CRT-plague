@@ -86,10 +86,13 @@ namespace Movement
             var velMag = _rigidbody.velocity.magnitude;
             if (velMag <= 0f) return;
             
+            var normal = _hit.normal;
+            
             var frictionForceMag = frictionCoefficient * velMag;
 
             var counterForce = -_rigidbody.velocity * frictionForceMag / velMag;
             counterForce.y = 0;
+            counterForce = Vector3.ProjectOnPlane(counterForce, normal);
             
             _rigidbody.AddForce(counterForce, ForceMode.VelocityChange);
         }

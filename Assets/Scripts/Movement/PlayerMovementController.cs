@@ -89,7 +89,8 @@ namespace Movement
             var frictionForceMag = frictionCoefficient * velMag;
 
             var counterForce = -_rigidbody.velocity * frictionForceMag / velMag;
-
+            counterForce.y = 0;
+            
             _rigidbody.AddForce(counterForce, ForceMode.VelocityChange);
         }
         

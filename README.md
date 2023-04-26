@@ -25,7 +25,7 @@ Maybe everything you need to know about this project and how to start contributi
 ## Commit Conventions
 We just use the mix of [Conventional Commits][commitConventions] and [Angular's][angularCommits].
 
-## The Versioning
+## Versioning
 Whenever we get to the point where we start making releases of this game we'll use [this][semVer] semantic versioning. 
 
 

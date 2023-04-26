@@ -29,7 +29,8 @@ namespace Movement
         
         // private fields
         private readonly GroundChecker _groundChecker = new();
-        private RaycastHit _hit;
+        private RaycastHit[] _hit;
+        private RaycastHit _hitMovement;
         
         private void Awake()
         {
@@ -57,7 +58,22 @@ namespace Movement
 
         private void Update()
         {
-            IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit);
+            IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit, groundLayerMask);
+
+            float steepestAngle = 0;
+            var steepestRaycast = _hit[0];
+            foreach (var raycastHit in _hit)
+            {
+                var angle = Vector3.Angle(raycastHit.normal, _hitMovement.normal);
+                if (angle > steepestAngle)
+                {
+                    steepestAngle = angle;
+                    steepestRaycast = raycastHit;
+                }
+            }
+
+            _hitMovement = steepestRaycast;
+            
 
             SlopeSlidingHandling();
         }
@@ -86,7 +102,7 @@ namespace Movement
             var velMag = _rigidbody.velocity.magnitude;
             if (velMag <= 0f) return;
             
-            var normal = _hit.normal;
+            var normal = _hitMovement.normal;
             
             var frictionForceMag = frictionCoefficient * velMag;
 
@@ -102,7 +118,7 @@ namespace Movement
         {
             var playerInput = _characterInput.Humanoid.Movement.ReadValue<Vector2>();
             var movementDirection = new Vector3(playerInput.x, 0, playerInput.y);
-            var normal = _hit.normal;
+            var normal = _hitMovement.normal;
             
             var cameraRotationVector = _playerCameraController.CameraRotationVector;
             cameraRotationVector = new Vector2(0, cameraRotationVector.y);
@@ -142,7 +158,7 @@ namespace Movement
                     bounds.size.z));
             
             Gizmos.color = Color.blue;
-            Gizmos.DrawLine(_hit.point, _hit.point + _hit.normal * 5);
+            Gizmos.DrawLine(_hitMovement.point, _hitMovement.point + _hitMovement.normal * 5);
         }
         
         public void Move(Vector3 direction)

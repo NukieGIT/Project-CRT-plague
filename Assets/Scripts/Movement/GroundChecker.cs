@@ -11,15 +11,20 @@ namespace Movement
         public RaycastHit RaycastHit { get; private set; }
         public bool IsObjectGrounded { get; private set; }
 
-        public bool IsGrounded(Transform transform, Bounds bounds, float extraHeight, out RaycastHit hit)
+        public bool IsGrounded(Transform transform, Bounds bounds, float extraHeight, out RaycastHit[] hit, int layerMask)
         {
-            IsObjectGrounded = Physics.BoxCast(bounds.center,
+            var hitsArray = new RaycastHit[5];
+            var hits = Physics.BoxCastNonAlloc(bounds.center,
                 bounds.extents / 2,
                 Vector3.down,
-                out hit,
+                hitsArray,
                 transform.rotation,
-                bounds.extents.y / 2 + extraHeight);
-    
+                bounds.extents.y / 2 + extraHeight,
+                layerMask);
+
+            hit = hitsArray;
+            IsObjectGrounded = hits > 0;
+            
             return IsObjectGrounded;
         }
     }

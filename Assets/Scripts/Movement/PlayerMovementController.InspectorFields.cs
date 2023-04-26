@@ -6,6 +6,8 @@ namespace Movement
     {
         [Header("Settings")]
         
+        [SerializeField] private LayerMask groundLayerMask;
+        
         [SerializeField] private float maxMovementSpeed = 5f;
         [SerializeField] private float acceleration = 0.5f;
         

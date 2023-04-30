@@ -18,6 +18,7 @@ public class GetTarget : MonoBehaviour
     private GameObject _holdedObject;
     private Vector3 _forceApplyer;
     private bool _forceApplying = false;
+    private Vector3 _forceDirection;
     private void Awake()
     {
         _movement = GetComponent<IPlayerMovement>();
@@ -40,12 +41,21 @@ public class GetTarget : MonoBehaviour
         if(Physics.Raycast(pPosition, objectHolder.transform.TransformDirection(Vector3.forward), out RaycastHit hit, 16f) && hit.collider.gameObject.layer == 8)
         {
             _holdedObject = hit.collider.gameObject;
+            _holdedObject.GetComponent<Rigidbody>().useGravity = false;
             _forceApplying |= true;
         }
         if (_forceApplying)
         {
-            _forceApplyer = Vector3.MoveTowards(_holdedObject.transform.position, objectHolder.transform.position, 1).normalized * -1f;
-            _holdedObject.GetComponent<Rigidbody>().AddForce(_forceApplyer);
+            Vector3 _forceDirection = (objectHolder.transform.position - _holdedObject.transform.position).normalized;
+            _forceApplyer = _forceDirection * 100f;
+            if(_holdedObject.transform.position == objectHolder.transform.position)
+            {
+                _holdedObject.GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);
+            }
+            else
+            {
+                _holdedObject.GetComponent<Rigidbody>().AddForce(_forceApplyer);
+            }
             Debug.DrawLine(_holdedObject.transform.position, objectHolder.transform.position, UnityEngine.Color.red);
         }
         Debug.DrawRay(pPosition, objectHolder.transform.TransformDirection(Vector3.forward), UnityEngine.Color.yellow);

@@ -31,5 +31,11 @@ public class GetTarget : MonoBehaviour
         objectHolder.transform.rotation = _cameraRotation;
         objectHolder.transform.position = _movement.Position;
         objectHolder.transform.position += objectHolder.transform.TransformDirection(Vector3.forward) * 2f; 
+        //Raycast
+        if(Physics.Raycast(pPosition, objectHolder.transform.TransformDirection(Vector3.forward), out RaycastHit hit, 16f) && hit.collider.gameObject.layer == 8)
+        {
+            Debug.Log("CanBePickedUp");
+        }
+        Debug.DrawRay(pPosition, objectHolder.transform.TransformDirection(Vector3.forward), Color.yellow);
     }
 }

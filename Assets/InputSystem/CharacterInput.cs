@@ -71,6 +71,24 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PickUp"",
+                    ""type"": ""Button"",
+                    ""id"": ""f7306888-c645-436f-b054-9fc4c610506e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PutDown"",
+                    ""type"": ""Button"",
+                    ""id"": ""765dd2eb-655c-4c24-9171-7f4fc736e2e3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -205,6 +223,28 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
                     ""action"": ""Sprint"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""3af8f9d7-9baf-447c-9163-74ba2e399352"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""MnK"",
+                    ""action"": ""PickUp"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""96263ef1-4922-4add-8e83-d24c29ec6007"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""MnK"",
+                    ""action"": ""PutDown"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -779,6 +819,8 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         m_Humanoid_Crouch = m_Humanoid.FindAction("Crouch", throwIfNotFound: true);
         m_Humanoid_Slide = m_Humanoid.FindAction("Slide", throwIfNotFound: true);
         m_Humanoid_Sprint = m_Humanoid.FindAction("Sprint", throwIfNotFound: true);
+        m_Humanoid_PickUp = m_Humanoid.FindAction("PickUp", throwIfNotFound: true);
+        m_Humanoid_PutDown = m_Humanoid.FindAction("PutDown", throwIfNotFound: true);
         // Humanoid Camera
         m_HumanoidCamera = asset.FindActionMap("Humanoid Camera", throwIfNotFound: true);
         m_HumanoidCamera_Camera = m_HumanoidCamera.FindAction("Camera", throwIfNotFound: true);
@@ -860,6 +902,8 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Humanoid_Crouch;
     private readonly InputAction m_Humanoid_Slide;
     private readonly InputAction m_Humanoid_Sprint;
+    private readonly InputAction m_Humanoid_PickUp;
+    private readonly InputAction m_Humanoid_PutDown;
     public struct HumanoidActions
     {
         private @CharacterInput m_Wrapper;
@@ -869,6 +913,8 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         public InputAction @Crouch => m_Wrapper.m_Humanoid_Crouch;
         public InputAction @Slide => m_Wrapper.m_Humanoid_Slide;
         public InputAction @Sprint => m_Wrapper.m_Humanoid_Sprint;
+        public InputAction @PickUp => m_Wrapper.m_Humanoid_PickUp;
+        public InputAction @PutDown => m_Wrapper.m_Humanoid_PutDown;
         public InputActionMap Get() { return m_Wrapper.m_Humanoid; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -893,6 +939,12 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
+            @PickUp.started += instance.OnPickUp;
+            @PickUp.performed += instance.OnPickUp;
+            @PickUp.canceled += instance.OnPickUp;
+            @PutDown.started += instance.OnPutDown;
+            @PutDown.performed += instance.OnPutDown;
+            @PutDown.canceled += instance.OnPutDown;
         }
 
         private void UnregisterCallbacks(IHumanoidActions instance)
@@ -912,6 +964,12 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
+            @PickUp.started -= instance.OnPickUp;
+            @PickUp.performed -= instance.OnPickUp;
+            @PickUp.canceled -= instance.OnPickUp;
+            @PutDown.started -= instance.OnPutDown;
+            @PutDown.performed -= instance.OnPutDown;
+            @PutDown.canceled -= instance.OnPutDown;
         }
 
         public void RemoveCallbacks(IHumanoidActions instance)
@@ -1109,6 +1167,8 @@ public partial class @CharacterInput: IInputActionCollection2, IDisposable
         void OnCrouch(InputAction.CallbackContext context);
         void OnSlide(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
+        void OnPickUp(InputAction.CallbackContext context);
+        void OnPutDown(InputAction.CallbackContext context);
     }
     public interface IHumanoidCameraActions
     {

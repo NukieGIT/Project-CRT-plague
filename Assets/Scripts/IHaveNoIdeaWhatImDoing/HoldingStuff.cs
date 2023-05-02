@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class GetTarget : MonoBehaviour
+public class HoldingStuff : MonoBehaviour
 {
     //objectHolder variables
     [SerializeField] private GameObject player;

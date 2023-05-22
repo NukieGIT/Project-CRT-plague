@@ -13,16 +13,15 @@ namespace Movement
 
         public bool IsGrounded(Transform transform, Bounds bounds, float extraHeight, out RaycastHit[] hit, int layerMask)
         {
-            var hitsArray = new RaycastHit[5];
+            hit = new RaycastHit[5];
             var hits = Physics.BoxCastNonAlloc(bounds.center,
                 bounds.extents / 2,
                 Vector3.down,
-                hitsArray,
+                hit,
                 transform.rotation,
                 bounds.extents.y / 2 + extraHeight,
                 layerMask);
 
-            hit = hitsArray;
             IsObjectGrounded = hits > 0;
             
             return IsObjectGrounded;

@@ -60,11 +60,19 @@ namespace Movement
         {
             IsGrounded = _groundChecker.IsGrounded(transform, _capsuleCollider.bounds, extraHeight, out _hit, groundLayerMask);
 
+            UpdateWhichSurfaceNormalToUse();
+
+
+            SlopeSlidingHandling();
+        }
+
+        private void UpdateWhichSurfaceNormalToUse()
+        {
             float steepestAngle = 0;
             var steepestRaycast = _hit[0];
             foreach (var raycastHit in _hit)
             {
-                var angle = Vector3.Angle(raycastHit.normal, _hitMovement.normal);
+                var angle = Vector3.Angle(raycastHit.normal, Vector3.up);
                 if (angle > steepestAngle)
                 {
                     steepestAngle = angle;
@@ -73,9 +81,6 @@ namespace Movement
             }
 
             _hitMovement = steepestRaycast;
-            
-
-            SlopeSlidingHandling();
         }
 
         private void SlopeSlidingHandling()
